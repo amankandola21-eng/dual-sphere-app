@@ -243,6 +243,51 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          booking_updates: boolean | null
+          created_at: string | null
+          email_enabled: boolean | null
+          id: string
+          marketing_notifications: boolean | null
+          message_notifications: boolean | null
+          payment_notifications: boolean | null
+          push_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          booking_updates?: boolean | null
+          created_at?: string | null
+          email_enabled?: boolean | null
+          id?: string
+          marketing_notifications?: boolean | null
+          message_notifications?: boolean | null
+          payment_notifications?: boolean | null
+          push_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          booking_updates?: boolean | null
+          created_at?: string | null
+          email_enabled?: boolean | null
+          id?: string
+          marketing_notifications?: boolean | null
+          message_notifications?: boolean | null
+          payment_notifications?: boolean | null
+          push_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -338,6 +383,48 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          active: boolean | null
+          auth_key: string | null
+          created_at: string | null
+          device_name: string | null
+          device_type: string | null
+          endpoint: string
+          id: string
+          p256dh_key: string | null
+          updated_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          auth_key?: string | null
+          created_at?: string | null
+          device_name?: string | null
+          device_type?: string | null
+          endpoint: string
+          id?: string
+          p256dh_key?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          auth_key?: string | null
+          created_at?: string | null
+          device_name?: string | null
+          device_type?: string | null
+          endpoint?: string
+          id?: string
+          p256dh_key?: string | null
+          updated_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

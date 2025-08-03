@@ -57,17 +57,17 @@ export const NotificationSettings = () => {
   const fetchPreferences = async () => {
     try {
       const { data, error } = await supabase
-        .from('notification_preferences')
+        .from('notification_preferences' as any)
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
         throw error;
       }
 
       if (data) {
-        setPreferences(data);
+        setPreferences(data as any);
       }
     } catch (error) {
       console.error('Error fetching notification preferences:', error);
@@ -89,7 +89,7 @@ export const NotificationSettings = () => {
       const updatedPreferences = { ...preferences, ...newPreferences };
       
       const { error } = await supabase
-        .from('notification_preferences')
+        .from('notification_preferences' as any)
         .upsert({
           user_id: user.id,
           ...updatedPreferences
