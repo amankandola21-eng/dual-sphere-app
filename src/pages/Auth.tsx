@@ -19,7 +19,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/customer');
     }
   }, [user, navigate]);
 
@@ -40,7 +40,7 @@ const Auth = () => {
           title: "Success",
           description: "Successfully signed in!",
         });
-        navigate('/');
+        navigate('/customer');
       }
     } catch (error) {
       toast({
