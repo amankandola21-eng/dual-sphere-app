@@ -4,10 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Clock, MapPin, User, DollarSign, Star } from "lucide-react";
+import { Calendar, Clock, MapPin, User, DollarSign, Star, CreditCard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PaymentFlow } from "./PaymentFlow";
 
 interface BookingSummaryProps {
   data: any;
@@ -17,6 +18,8 @@ interface BookingSummaryProps {
 
 const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingId, setBookingId] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -48,7 +51,7 @@ const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
       const bookingPayload = {
         user_id: user.id,
         cleaner_id: data.cleaner?.id,
-        service_id: (await supabase.from('services').select('id').limit(1).single()).data?.id, // Temporary fix for required field
+        service_id: (await supabase.from('services').select('id').limit(1).single()).data?.id,
         scheduled_date: data.date.toISOString().split('T')[0],
         scheduled_time: convertTimeToSQL(data.time),
         address_line1: data.address?.street || '',
@@ -59,34 +62,54 @@ const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
         estimated_hours: data.estimatedHours,
         hourly_rate: data.hourlyRate,
         commission_rate: commissionRate,
-        total_price: parseFloat(totalCost), // Add the required total_price field
+        total_price: parseFloat(totalCost),
+        status: 'pending', // Will be updated to payment_pending when payment intent is created
       };
 
-      const { error } = await supabase
+      const { data: newBooking, error } = await supabase
         .from('bookings')
-        .insert([bookingPayload]);
+        .insert([bookingPayload])
+        .select()
+        .single();
 
       if (error) {
         throw error;
       }
 
+      setBookingId(newBooking.id);
+      setShowPayment(true);
+
       toast({
-        title: "Booking confirmed!",
-        description: "Your cleaning appointment has been scheduled successfully.",
+        title: "Booking created!",
+        description: "Please complete payment to confirm your booking.",
       });
 
-      // Navigate back to dashboard or show success screen
-      onNext();
     } catch (error) {
       console.error('Booking error:', error);
       toast({
         title: "Booking failed",
-        description: "There was an error processing your booking. Please try again.",
+        description: "There was an error creating your booking. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    toast({
+      title: "Payment successful!",
+      description: "Your cleaning appointment is confirmed and payment is secured.",
+    });
+    onNext();
+  };
+
+  const handlePaymentError = (error: string) => {
+    toast({
+      title: "Payment failed",
+      description: error,
+      variant: "destructive",
+    });
   };
 
   // Helper function to convert time format
@@ -227,15 +250,31 @@ const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
         </Card>
       )}
 
-      {/* Confirm Button */}
-      <Button 
-        onClick={handleConfirmBooking} 
-        className="w-full" 
-        size="lg"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Processing..." : "Confirm Booking"}
-      </Button>
+      {/* Payment Flow or Confirm Button */}
+      {showPayment && bookingId ? (
+        <div className="flex justify-center">
+          <PaymentFlow
+            bookingId={bookingId}
+            amount={parseFloat(totalCost)}
+            onPaymentSuccess={handlePaymentSuccess}
+            onPaymentError={handlePaymentError}
+          />
+        </div>
+      ) : (
+        <Button 
+          onClick={handleConfirmBooking} 
+          className="w-full" 
+          size="lg"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Creating Booking..." : (
+            <>
+              <CreditCard className="h-4 w-4 mr-2" />
+              Continue to Payment
+            </>
+          )}
+        </Button>
+      )}
     </div>
   );
 };
