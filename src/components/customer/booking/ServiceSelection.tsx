@@ -1,45 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Clock, DollarSign } from "lucide-react";
-
-const services = [
-  {
-    id: "standard",
-    name: "Standard Cleaning",
-    description: "Surface cleaning, dusting, vacuuming, mopping, kitchen/bathroom cleaning, garbage removal",
-    basePrice: 80,
-    duration: 2,
-  },
-  {
-    id: "deep",
-    name: "Deep Cleaning",
-    description: "Everything in Standard Cleaning plus baseboards, behind furniture, light fixtures, detailed scrubbing",
-    basePrice: 150,
-    duration: 4,
-  },
-  {
-    id: "move",
-    name: "Move In/Move Out Cleaning",
-    description: "Deep cleaning for empty homes, inside cabinets, appliances, baseboards, closets, spot wall cleaning",
-    basePrice: 200,
-    duration: 5,
-  },
-  {
-    id: "construction",
-    name: "Post Construction Cleaning",
-    description: "Removal of dust, debris, construction residue, window washing, detailed surfaces",
-    basePrice: 250,
-    duration: 6,
-  },
-  {
-    id: "rental",
-    name: "Short-Term Rental Turnover",
-    description: "Hotel-style reset: linens, towels, toiletries, photo verification, fast turnaround",
-    basePrice: 120,
-    duration: 3,
-  },
-];
+import { Check, Clock, DollarSign, Loader2 } from "lucide-react";
+import { useServices } from "@/hooks/useServices";
 
 interface ServiceSelectionProps {
   data: any;
@@ -49,11 +12,30 @@ interface ServiceSelectionProps {
 
 const ServiceSelection = ({ data, onUpdate, onNext }: ServiceSelectionProps) => {
   const [selectedService, setSelectedService] = useState(data.serviceType);
+  const { data: services, isLoading, error } = useServices();
 
   const handleServiceSelect = (service: any) => {
     setSelectedService(service);
     onUpdate({ ...data, serviceType: service });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin" />
+        <span className="ml-2">Loading services...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-destructive">Failed to load services. Please try again.</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="space-y-4">
@@ -63,7 +45,7 @@ const ServiceSelection = ({ data, onUpdate, onNext }: ServiceSelectionProps) => 
       </div>
 
       <div className="space-y-3">
-        {services.map((service) => (
+        {services?.map((service) => (
           <Card 
             key={service.id}
             className={`cursor-pointer transition-all ${
@@ -84,7 +66,7 @@ const ServiceSelection = ({ data, onUpdate, onNext }: ServiceSelectionProps) => 
                   </CardTitle>
                 </div>
                 <Badge variant="secondary" className="ml-2">
-                  ${service.basePrice}
+                  ${service.base_price}
                 </Badge>
               </div>
             </CardHeader>
@@ -95,11 +77,11 @@ const ServiceSelection = ({ data, onUpdate, onNext }: ServiceSelectionProps) => 
               <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {service.duration}h
+                  {service.duration_hours}h
                 </div>
                 <div className="flex items-center gap-1">
                   <DollarSign className="h-3 w-3" />
-                  Starting at ${service.basePrice}
+                  Starting at ${service.base_price}
                 </div>
               </div>
             </CardContent>
