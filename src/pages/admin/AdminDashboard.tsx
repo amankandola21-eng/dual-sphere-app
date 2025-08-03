@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { AdminPaymentOversight } from '@/components/admin/AdminPaymentOversight';
 import { AdminUserManagement } from '@/components/admin/AdminUserManagement';
 import { AdminPlatformSettings } from '@/components/admin/AdminPlatformSettings';
+import { ChargeAppealsManagement } from '@/components/admin/ChargeAppealsManagement';
+import { NotificationPreferencesPanel } from '@/components/shared/NotificationPreferencesPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -12,7 +14,9 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Calendar
+  Calendar,
+  FileText,
+  Bell
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -38,7 +42,9 @@ const AdminDashboard = () => {
   const navigation = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'payments', label: 'Payment Oversight', icon: DollarSign },
+    { id: 'appeals', label: 'Charge Appeals', icon: FileText },
     { id: 'users', label: 'User Management', icon: Users },
+    { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Platform Settings', icon: Settings },
   ];
 
@@ -46,8 +52,12 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case 'payments':
         return <AdminPaymentOversight />;
+      case 'appeals':
+        return <ChargeAppealsManagement />;
       case 'users':
         return <AdminUserManagement />;
+      case 'notifications':
+        return <NotificationPreferencesPanel />;
       case 'settings':
         return <AdminPlatformSettings />;
       default:
