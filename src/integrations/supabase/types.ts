@@ -47,6 +47,9 @@ export type Database = {
       bookings: {
         Row: {
           accepted_at: string | null
+          actual_end_time: string | null
+          actual_hours_worked: number | null
+          actual_start_time: string | null
           address_line1: string
           address_line2: string | null
           city: string
@@ -61,6 +64,7 @@ export type Database = {
           declined_at: string | null
           declined_reason: string | null
           estimated_hours: number
+          final_amount: number | null
           hourly_rate: number
           id: string
           no_show_charge_amount: number | null
@@ -81,6 +85,9 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          actual_end_time?: string | null
+          actual_hours_worked?: number | null
+          actual_start_time?: string | null
           address_line1: string
           address_line2?: string | null
           city: string
@@ -95,6 +102,7 @@ export type Database = {
           declined_at?: string | null
           declined_reason?: string | null
           estimated_hours?: number
+          final_amount?: number | null
           hourly_rate?: number
           id?: string
           no_show_charge_amount?: number | null
@@ -115,6 +123,9 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          actual_end_time?: string | null
+          actual_hours_worked?: number | null
+          actual_start_time?: string | null
           address_line1?: string
           address_line2?: string | null
           city?: string
@@ -129,6 +140,7 @@ export type Database = {
           declined_at?: string | null
           declined_reason?: string | null
           estimated_hours?: number
+          final_amount?: number | null
           hourly_rate?: number
           id?: string
           no_show_charge_amount?: number | null
@@ -232,6 +244,7 @@ export type Database = {
           experience_years: number | null
           hourly_rate: number
           id: string
+          profile_photo_url: string | null
           rating: number | null
           stripe_account_id: string | null
           total_jobs: number | null
@@ -245,6 +258,7 @@ export type Database = {
           experience_years?: number | null
           hourly_rate?: number
           id?: string
+          profile_photo_url?: string | null
           rating?: number | null
           stripe_account_id?: string | null
           total_jobs?: number | null
@@ -258,6 +272,7 @@ export type Database = {
           experience_years?: number | null
           hourly_rate?: number
           id?: string
+          profile_photo_url?: string | null
           rating?: number | null
           stripe_account_id?: string | null
           total_jobs?: number | null

@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { CleanerPhotoUpload } from '@/components/cleaner/CleanerPhotoUpload';
 import { 
   User, 
   Star, 
@@ -28,6 +29,7 @@ interface CleanerProfile {
   available: boolean;
   rating: number;
   total_jobs: number;
+  profile_photo_url?: string;
   profiles?: {
     display_name: string;
     avatar_url?: string;
@@ -65,6 +67,7 @@ export const CleanerProfileManagement = () => {
           available,
           rating,
           total_jobs,
+          profile_photo_url,
           profiles!cleaners_user_id_fkey(display_name, avatar_url)
         `)
         .eq('user_id', user.id)
@@ -211,26 +214,24 @@ export const CleanerProfileManagement = () => {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
+        {/* Profile Photo Section */}
+        <div className="lg:col-span-3">
+          <CleanerPhotoUpload 
+            currentPhotoUrl={profile.profile_photo_url}
+            cleanerName={profile.profiles?.display_name || 'Cleaner'}
+            onPhotoUpdated={(newPhotoUrl) => {
+              setProfile(prev => prev ? { ...prev, profile_photo_url: newPhotoUrl } : null);
+              fetchProfile(); // Refresh to get updated data
+            }}
+          />
+        </div>
+
         {/* Profile Overview */}
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle>Profile Overview</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Avatar */}
-            <div className="text-center">
-              <Avatar className="h-24 w-24 mx-auto mb-4">
-                <AvatarImage src={profile.profiles?.avatar_url} />
-                <AvatarFallback className="text-lg">
-                  <User className="h-8 w-8" />
-                </AvatarFallback>
-              </Avatar>
-              <Button variant="outline" size="sm">
-                <Camera className="h-4 w-4 mr-2" />
-                Change Photo
-              </Button>
-            </div>
-
             {/* Stats */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -281,7 +282,7 @@ export const CleanerProfileManagement = () => {
             <div className="space-y-2">
               <Label htmlFor="hourly_rate">
                 <DollarSign className="h-4 w-4 inline mr-1" />
-                Hourly Rate
+                Hourly Rate (Pro-Rated Billing)
               </Label>
               {isEditing ? (
                 <Input
@@ -298,6 +299,9 @@ export const CleanerProfileManagement = () => {
                   ${profile.hourly_rate}/hour
                 </p>
               )}
+              <p className="text-xs text-muted-foreground">
+                Customers are charged for exact time worked - no rounding up or down!
+              </p>
             </div>
 
             {/* Experience */}
@@ -368,6 +372,21 @@ export const CleanerProfileManagement = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pro-Rated Billing Info */}
+      <Card className="border-green-200 bg-green-50">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-3">
+            <DollarSign className="h-5 w-5 text-green-600 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-green-900">Pro-Rated Billing System</h3>
+              <p className="text-sm text-green-700 mt-1">
+                Our fair billing system charges customers for exact time worked. Use the time tracking feature during jobs to automatically calculate the final amount - no more rounding up or down!
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Account Security */}
       <Card className="border-blue-200 bg-blue-50">

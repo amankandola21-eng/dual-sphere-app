@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ConnectAccountSetup } from '@/components/cleaner/ConnectAccountSetup';
 import { BookingAcceptance } from '@/components/cleaner/BookingAcceptance';
 import { GPSVerification } from '@/components/cleaner/GPSVerification';
+import { TimeTracking } from '@/components/cleaner/TimeTracking';
 import { NotificationPreferencesPanel } from '@/components/shared/NotificationPreferencesPanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -300,6 +301,11 @@ const CleanerDashboard = () => {
                   <GPSVerification 
                     booking={booking} 
                     onArrivalConfirmed={fetchBookings}
+                  />
+                  
+                  <TimeTracking 
+                    booking={booking} 
+                    onTimeUpdated={fetchBookings}
                   />
                 </div>
               ))
