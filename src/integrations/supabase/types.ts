@@ -14,13 +14,49 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           address_line1: string
           address_line2: string | null
           city: string
+          cleaner_earnings: number | null
+          cleaner_id: string | null
+          commission_rate: number
           created_at: string
+          estimated_hours: number
+          hourly_rate: number
           id: string
+          platform_commission: number | null
           postal_code: string
           scheduled_date: string
           scheduled_time: string
@@ -35,8 +71,14 @@ export type Database = {
           address_line1: string
           address_line2?: string | null
           city: string
+          cleaner_earnings?: number | null
+          cleaner_id?: string | null
+          commission_rate?: number
           created_at?: string
+          estimated_hours?: number
+          hourly_rate?: number
           id?: string
+          platform_commission?: number | null
           postal_code: string
           scheduled_date: string
           scheduled_time: string
@@ -51,8 +93,14 @@ export type Database = {
           address_line1?: string
           address_line2?: string | null
           city?: string
+          cleaner_earnings?: number | null
+          cleaner_id?: string | null
+          commission_rate?: number
           created_at?: string
+          estimated_hours?: number
+          hourly_rate?: number
           id?: string
+          platform_commission?: number | null
           postal_code?: string
           scheduled_date?: string
           scheduled_time?: string
@@ -64,6 +112,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bookings_cleaner_id_fkey"
+            columns: ["cleaner_id"]
+            isOneToOne: false
+            referencedRelation: "cleaners"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bookings_service_id_fkey"
             columns: ["service_id"]
@@ -88,6 +143,45 @@ export type Database = {
           created_at?: string
           Custom?: string | null
           id?: number
+        }
+        Relationships: []
+      }
+      cleaners: {
+        Row: {
+          available: boolean
+          bio: string | null
+          created_at: string
+          experience_years: number | null
+          hourly_rate: number
+          id: string
+          rating: number | null
+          total_jobs: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available?: boolean
+          bio?: string | null
+          created_at?: string
+          experience_years?: number | null
+          hourly_rate?: number
+          id?: string
+          rating?: number | null
+          total_jobs?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available?: boolean
+          bio?: string | null
+          created_at?: string
+          experience_years?: number | null
+          hourly_rate?: number
+          id?: string
+          rating?: number | null
+          total_jobs?: number | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -148,15 +242,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "customer" | "cleaner" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -283,6 +404,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["customer", "cleaner", "admin"],
+    },
   },
 } as const
