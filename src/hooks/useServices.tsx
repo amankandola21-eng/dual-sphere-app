@@ -49,8 +49,15 @@ export const useAvailableCleaners = () => {
       const { data, error } = await supabase
         .from('cleaners')
         .select(`
-          *,
-          profiles!inner(display_name, avatar_url)
+          id,
+          user_id,
+          hourly_rate,
+          bio,
+          experience_years,
+          available,
+          rating,
+          total_jobs,
+          profiles!cleaners_user_id_fkey(display_name, avatar_url)
         `)
         .eq('available', true)
         .order('hourly_rate', { ascending: true });
@@ -59,7 +66,7 @@ export const useAvailableCleaners = () => {
         throw error;
       }
 
-      return data as any[]; // We'll handle typing in the component
+      return data as any[];
     },
   });
 };
