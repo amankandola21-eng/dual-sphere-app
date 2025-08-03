@@ -133,10 +133,18 @@ const Index = () => {
           )}
           
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="h-12">
+            <Button 
+              variant="outline" 
+              className="h-12"
+              onClick={() => navigate("/cleaner")}
+            >
               I'm a Cleaner
             </Button>
-            <Button variant="outline" className="h-12">
+            <Button 
+              variant="outline" 
+              className="h-12"
+              onClick={() => navigate("/admin")}
+            >
               Admin Portal
             </Button>
           </div>

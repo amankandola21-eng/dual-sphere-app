@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, MapPin, Clock, Star } from "lucide-react";
+import { Navigation } from "@/components/layout/Navigation";
 import BookingFlow from "@/components/customer/BookingFlow";
 import BookingHistory from "@/components/customer/BookingHistory";
 import ProfileSection from "@/components/customer/ProfileSection";
@@ -15,8 +16,9 @@ const CustomerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="max-w-md mx-auto p-4 pt-16 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold">CleanerConnect</h1>
