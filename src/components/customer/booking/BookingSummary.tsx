@@ -51,10 +51,10 @@ const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
         service_id: (await supabase.from('services').select('id').limit(1).single()).data?.id, // Temporary fix for required field
         scheduled_date: data.date.toISOString().split('T')[0],
         scheduled_time: convertTimeToSQL(data.time),
-        address_line1: data.address?.line1,
-        address_line2: data.address?.line2 || null,
-        city: data.address?.city,
-        postal_code: data.address?.postalCode,
+        address_line1: data.address?.street || '',
+        address_line2: data.address?.aptUnit || null,
+        city: data.address?.city || '',
+        postal_code: data.address?.zipCode || '',
         special_instructions: data.specialInstructions || null,
         estimated_hours: data.estimatedHours,
         hourly_rate: data.hourlyRate,
@@ -180,9 +180,9 @@ const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
           </CardHeader>
           <CardContent>
             <div className="text-sm space-y-1">
-              <p>{data.address.line1}</p>
-              {data.address.line2 && <p>{data.address.line2}</p>}
-              <p>{data.address.city}, {data.address.postalCode}</p>
+              <p>{data.address.street}</p>
+              {data.address.aptUnit && <p>{data.address.aptUnit}</p>}
+              <p>{data.address.city}, {data.address.state} {data.address.zipCode}</p>
             </div>
           </CardContent>
         </Card>
