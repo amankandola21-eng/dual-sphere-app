@@ -46,16 +46,26 @@ export type Database = {
       }
       bookings: {
         Row: {
+          accepted_at: string | null
           address_line1: string
           address_line2: string | null
           city: string
+          cleaner_arrival_lat: number | null
+          cleaner_arrival_lng: number | null
+          cleaner_arrived_at: string | null
           cleaner_earnings: number | null
           cleaner_id: string | null
           commission_rate: number
           created_at: string
+          customer_confirmed_access: boolean | null
+          declined_at: string | null
+          declined_reason: string | null
           estimated_hours: number
           hourly_rate: number
           id: string
+          no_show_charge_amount: number | null
+          no_show_charged_at: string | null
+          no_show_detected: boolean | null
           payment_intent_id: string | null
           payment_status: string | null
           platform_commission: number | null
@@ -70,16 +80,26 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepted_at?: string | null
           address_line1: string
           address_line2?: string | null
           city: string
+          cleaner_arrival_lat?: number | null
+          cleaner_arrival_lng?: number | null
+          cleaner_arrived_at?: string | null
           cleaner_earnings?: number | null
           cleaner_id?: string | null
           commission_rate?: number
           created_at?: string
+          customer_confirmed_access?: boolean | null
+          declined_at?: string | null
+          declined_reason?: string | null
           estimated_hours?: number
           hourly_rate?: number
           id?: string
+          no_show_charge_amount?: number | null
+          no_show_charged_at?: string | null
+          no_show_detected?: boolean | null
           payment_intent_id?: string | null
           payment_status?: string | null
           platform_commission?: number | null
@@ -94,16 +114,26 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepted_at?: string | null
           address_line1?: string
           address_line2?: string | null
           city?: string
+          cleaner_arrival_lat?: number | null
+          cleaner_arrival_lng?: number | null
+          cleaner_arrived_at?: string | null
           cleaner_earnings?: number | null
           cleaner_id?: string | null
           commission_rate?: number
           created_at?: string
+          customer_confirmed_access?: boolean | null
+          declined_at?: string | null
+          declined_reason?: string | null
           estimated_hours?: number
           hourly_rate?: number
           id?: string
+          no_show_charge_amount?: number | null
+          no_show_charged_at?: string | null
+          no_show_detected?: boolean | null
           payment_intent_id?: string | null
           payment_status?: string | null
           platform_commission?: number | null
@@ -133,6 +163,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      charge_appeals: {
+        Row: {
+          admin_notes: string | null
+          appeal_description: string | null
+          appeal_reason: string
+          booking_id: string
+          created_at: string
+          customer_id: string
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          appeal_description?: string | null
+          appeal_reason: string
+          booking_id: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          appeal_description?: string | null
+          appeal_reason?: string
+          booking_id?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       CleanerConnect: {
         Row: {
