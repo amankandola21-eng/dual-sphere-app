@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ServiceSelection from "./booking/ServiceSelection";
-import DateTimeSelection from "./booking/DateTimeSelection";
+import DurationTimeSelection from "./booking/DurationTimeSelection";
 import AddressForm from "./booking/AddressForm";
 import BookingSummary from "./booking/BookingSummary";
 
@@ -14,7 +14,9 @@ interface BookingFlowProps {
 const BookingFlow = ({ onBack }: BookingFlowProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [bookingData, setBookingData] = useState({
-    serviceType: null,
+    cleaner: null,
+    hourlyRate: null,
+    estimatedHours: 2,
     date: null,
     time: null,
     address: null,
@@ -22,8 +24,8 @@ const BookingFlow = ({ onBack }: BookingFlowProps) => {
   });
 
   const steps = [
-    { number: 1, title: "Service", component: ServiceSelection },
-    { number: 2, title: "Date & Time", component: DateTimeSelection },
+    { number: 1, title: "Cleaner", component: ServiceSelection },
+    { number: 2, title: "Duration", component: DurationTimeSelection },
     { number: 3, title: "Address", component: AddressForm },
     { number: 4, title: "Summary", component: BookingSummary },
   ];

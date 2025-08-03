@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, MapPin, Clock, CreditCard, MessageSquare } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar, Clock, MapPin, User, DollarSign, Star } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 interface BookingSummaryProps {
@@ -12,119 +16,226 @@ interface BookingSummaryProps {
 }
 
 const BookingSummary = ({ data, onUpdate, onNext }: BookingSummaryProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleConfirmBooking = () => {
-    toast({
-      title: "Booking Confirmed!",
-      description: "Your cleaning appointment has been scheduled. You'll receive a confirmation email shortly.",
-    });
-    // Here you would typically save the booking to the database
-    // For now, we'll just show the success message
+  const totalCost = data.hourlyRate && data.estimatedHours 
+    ? (data.hourlyRate * data.estimatedHours).toFixed(2)
+    : '0.00';
+
+  const handleConfirmBooking = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to complete your booking",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Get current commission rate from admin settings
+      const { data: settings } = await supabase
+        .from('admin_settings')
+        .select('setting_value')
+        .eq('setting_key', 'commission_rate')
+        .single();
+
+      const commissionRate = settings?.setting_value ? parseFloat(settings.setting_value) : 5.00;
+
+      const bookingPayload = {
+        user_id: user.id,
+        cleaner_id: data.cleaner?.id,
+        service_id: (await supabase.from('services').select('id').limit(1).single()).data?.id, // Temporary fix for required field
+        scheduled_date: data.date.toISOString().split('T')[0],
+        scheduled_time: convertTimeToSQL(data.time),
+        address_line1: data.address?.line1,
+        address_line2: data.address?.line2 || null,
+        city: data.address?.city,
+        postal_code: data.address?.postalCode,
+        special_instructions: data.specialInstructions || null,
+        estimated_hours: data.estimatedHours,
+        hourly_rate: data.hourlyRate,
+        commission_rate: commissionRate,
+        total_price: parseFloat(totalCost), // Add the required total_price field
+      };
+
+      const { error } = await supabase
+        .from('bookings')
+        .insert([bookingPayload]);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Booking confirmed!",
+        description: "Your cleaning appointment has been scheduled successfully.",
+      });
+
+      // Navigate back to dashboard or show success screen
+      onNext();
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast({
+        title: "Booking failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const subtotal = data.serviceType?.basePrice || 0;
-  const platformFee = Math.round(subtotal * 0.05); // 5% platform fee
-  const total = subtotal + platformFee;
+  // Helper function to convert time format
+  const convertTimeToSQL = (timeString: string) => {
+    const [time, period] = timeString.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    
+    if (period === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (period === 'AM' && hours === 12) {
+      hours = 0;
+    }
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+  };
 
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <h3 className="text-lg font-semibold">Booking Summary</h3>
-        <p className="text-sm text-muted-foreground">Review your details before confirming</p>
+        <p className="text-sm text-muted-foreground">Review your booking details</p>
       </div>
 
-      {/* Service Details */}
+      {/* Cleaner Info */}
+      {data.cleaner && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Your Cleaner
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={data.cleaner.profiles?.avatar_url} />
+                <AvatarFallback>
+                  <User className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="font-medium">{data.cleaner.profiles?.display_name || 'Cleaner'}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs text-muted-foreground">{data.cleaner.rating}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-muted-foreground">${data.cleaner.hourly_rate}/hr</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Date & Time */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">{data.serviceType?.name}</CardTitle>
-          <CardDescription>{data.serviceType?.description}</CardDescription>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Date & Time
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center gap-3 text-sm">
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            <span>{data.date?.toLocaleDateString()} at {data.time}</span>
+        <CardContent className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Date:</span>
+            <span className="text-sm font-medium">
+              {data.date?.toLocaleDateString()}
+            </span>
           </div>
-          
-          <div className="flex items-center gap-3 text-sm">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>{data.serviceType?.duration} hours</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Time:</span>
+            <span className="text-sm font-medium">{data.time}</span>
           </div>
-
-          <div className="flex items-start gap-3 text-sm">
-            <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-            <div>
-              <p>{data.address?.street}</p>
-              {data.address?.aptUnit && <p>Apt {data.address.aptUnit}</p>}
-              <p>{data.address?.city}, {data.address?.state} {data.address?.zipCode}</p>
-            </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Duration:</span>
+            <span className="text-sm font-medium">{data.estimatedHours} hour{data.estimatedHours !== 1 ? 's' : ''}</span>
           </div>
-
-          {data.specialInstructions && (
-            <div className="flex items-start gap-3 text-sm">
-              <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5" />
-              <p className="text-muted-foreground">{data.specialInstructions}</p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Pricing Breakdown */}
+      {/* Address */}
+      {data.address && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Service Address
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm space-y-1">
+              <p>{data.address.line1}</p>
+              {data.address.line2 && <p>{data.address.line2}</p>}
+              <p>{data.address.city}, {data.address.postalCode}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pricing */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            Payment Summary
+            <DollarSign className="h-4 w-4" />
+            Pricing
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="flex justify-between text-sm">
-            <span>Service Fee</span>
-            <span>${subtotal}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Hourly Rate:</span>
+            <span className="text-sm">${data.hourlyRate}/hr</span>
           </div>
-          <div className="flex justify-between text-sm">
-            <span>Platform Fee</span>
-            <span>${platformFee}</span>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Duration:</span>
+            <span className="text-sm">{data.estimatedHours} hour{data.estimatedHours !== 1 ? 's' : ''}</span>
           </div>
           <Separator />
-          <div className="flex justify-between font-semibold">
-            <span>Total</span>
-            <span>${total}</span>
-          </div>
-          
-          <div className="mt-4 p-3 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground">
-              Payment will be held for 24 hours after job completion. 
-              You can rate and review your cleaner before the payment is released.
-            </p>
+          <div className="flex items-center justify-between">
+            <span className="font-medium">Total:</span>
+            <Badge variant="secondary" className="text-base">
+              ${totalCost}
+            </Badge>
           </div>
         </CardContent>
       </Card>
 
-      {/* Cleaner Assignment */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="text-center space-y-2">
-            <Badge variant="secondary">Cleaner Assignment</Badge>
-            <p className="text-sm text-muted-foreground">
-              We'll assign the best available cleaner to your booking and notify you within 30 minutes.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Special Instructions */}
+      {data.specialInstructions && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Special Instructions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{data.specialInstructions}</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Confirm Button */}
       <Button 
-        onClick={handleConfirmBooking}
-        className="w-full h-12 text-lg"
+        onClick={handleConfirmBooking} 
+        className="w-full" 
         size="lg"
+        disabled={isSubmitting}
       >
-        Confirm Booking - ${total}
+        {isSubmitting ? "Processing..." : "Confirm Booking"}
       </Button>
-
-      <p className="text-xs text-center text-muted-foreground">
-        By confirming, you agree to our Terms of Service and Privacy Policy
-      </p>
     </div>
   );
 };
