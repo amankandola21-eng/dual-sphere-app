@@ -118,10 +118,38 @@ serve(async (req) => {
       }
     }
 
+    // Also send email notification if enabled
+    let emailSent = false;
+    if (send_push) {
+      try {
+        // Get user's email from auth
+        const { data: authUser } = await supabase.auth.admin.getUserById(user_id);
+        
+        if (authUser?.user?.email) {
+          const emailResponse = await supabase.functions.invoke('send-email-notification', {
+            body: {
+              user_id,
+              email: authUser.user.email,
+              title,
+              message,
+              type,
+              booking_id: data?.booking_id
+            }
+          });
+          
+          emailSent = emailResponse.error ? false : true;
+          console.log('Email notification result:', emailSent ? 'sent' : 'failed');
+        }
+      } catch (emailError) {
+        console.error('Error sending email notification:', emailError);
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         notification_id: notification.id,
+        email_sent: emailSent,
         message: 'Notification sent successfully'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
