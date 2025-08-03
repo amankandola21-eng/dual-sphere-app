@@ -8,8 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Star, MapPin, Clock, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getPrivateDisplayName, getPrivateInitials } from "@/lib/privacy";
 
 interface CleanerProfile {
   id: string;
@@ -26,6 +28,7 @@ interface CleanerProfile {
 
 export const CleanerSearch = () => {
   const { user } = useAuth();
+  const { userRole } = useUserRole();
   const { toast } = useToast();
   const [cleaners, setCleaners] = useState<CleanerProfile[]>([]);
   const [filteredCleaners, setFilteredCleaners] = useState<CleanerProfile[]>([]);
@@ -256,14 +259,14 @@ export const CleanerSearch = () => {
                 <div className="flex items-start space-x-4">
                   <Avatar className="h-16 w-16">
                     <AvatarFallback className="text-lg">
-                      {cleaner.display_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                      {getPrivateInitials(cleaner.display_name, userRole)}
                     </AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold">{cleaner.display_name}</h3>
+                        <h3 className="text-lg font-semibold">{getPrivateDisplayName(cleaner.display_name, userRole)}</h3>
                         <div className="flex items-center space-x-2 mt-1">
                           <div className="flex items-center">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />

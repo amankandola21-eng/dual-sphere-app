@@ -3,7 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Check, Clock, DollarSign, Loader2, Star, User } from "lucide-react";
 import { useAvailableCleaners } from "@/hooks/useServices";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getPrivateDisplayName } from "@/lib/privacy";
 
 interface ServiceSelectionProps {
   data: any;
@@ -14,6 +16,7 @@ interface ServiceSelectionProps {
 const ServiceSelection = ({ data, onUpdate, onNext }: ServiceSelectionProps) => {
   const [selectedCleaner, setSelectedCleaner] = useState(data.cleaner);
   const { data: cleaners, isLoading, error } = useAvailableCleaners();
+  const { userRole } = useUserRole();
 
   const handleCleanerSelect = (cleaner: any) => {
     setSelectedCleaner(cleaner);
@@ -67,7 +70,7 @@ const ServiceSelection = ({ data, onUpdate, onNext }: ServiceSelectionProps) => 
                   </Avatar>
                   <div className="flex-1">
                     <CardTitle className="text-base flex items-center gap-2">
-                      {cleaner.profiles?.display_name || 'Cleaner'}
+                      {getPrivateDisplayName(cleaner.profiles?.display_name, userRole)}
                       {selectedCleaner?.id === cleaner.id && (
                         <Check className="h-4 w-4 text-primary" />
                       )}

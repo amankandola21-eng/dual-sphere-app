@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageSquare, Calendar, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Chat } from "./Chat";
+import { getPrivateDisplayName, getPrivateInitials } from "@/lib/privacy";
 
 interface Conversation {
   booking_id: string;
@@ -22,6 +24,7 @@ interface Conversation {
 
 export const MessagesList = () => {
   const { user } = useAuth();
+  const { userRole } = useUserRole();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedChat, setSelectedChat] = useState<{
@@ -75,9 +78,10 @@ export const MessagesList = () => {
 
           const isCustomer = booking.user_id === user?.id;
           const otherUserId = isCustomer ? booking.cleaner_id : booking.user_id;
-          const otherUserName = isCustomer ? 
+          const otherUserFullName = isCustomer ? 
             (booking.cleaner_profile as any)?.display_name || 'Cleaner' :
             (booking.customer as any)?.display_name || 'Customer';
+          const otherUserName = getPrivateDisplayName(otherUserFullName, userRole);
 
           return {
             booking_id: booking.id,
@@ -174,7 +178,7 @@ export const MessagesList = () => {
               <div className="flex items-start space-x-3">
                 <Avatar className="h-10 w-10">
                   <AvatarFallback>
-                    {conversation.other_user_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    {getPrivateInitials(conversation.other_user_name, userRole)}
                   </AvatarFallback>
                 </Avatar>
                 
