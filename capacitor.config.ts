@@ -1,7 +1,8 @@
+
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.795aa452ff264a5cb5be3c647e01e484',
+  appId: 'app.lovable.dualsphereapp',
   appName: 'CleanerConnect',
   webDir: 'dist',
   server: {
